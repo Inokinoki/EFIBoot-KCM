@@ -1,0 +1,3 @@
+[submodule "third_party/qefivar"]
+	path = third_party/qefivar
+	url = https://github.com/Inokinoki/qefivar.git

@@ -43,16 +43,8 @@ ecm_set_disabled_deprecation_versions(QT 6.9.0
     KF 6.18.0
 )
 
-# QEFI / qefivar
-find_package(QEFI QUIET)
-if (NOT QEFI_FOUND)
-    include(FetchContent)
-    FetchContent_Declare(QEFI
-        GIT_REPOSITORY https://github.com/Inokinoki/qefivar.git
-        GIT_TAG v0.4.1
-    )
-    FetchContent_MakeAvailable(QEFI)
-endif()
+# QEFI / qefivar (git submodule)
+add_subdirectory(third_party/qefivar EXCLUDE_FROM_ALL)
 
 kcmutils_add_qml_kcm(kcm_efiboot SOURCES
     kcm.cpp
@@ -75,6 +67,10 @@ target_link_libraries(kcm_efiboot PRIVATE
     KF6::KCMUtilsQuick
     KF6::AuthCore
     QEFI::QEFI
+)
+
+target_include_directories(kcm_efiboot PRIVATE
+    ${CMAKE_SOURCE_DIR}/third_party/qefivar
 )
 
 add_subdirectory(helper)

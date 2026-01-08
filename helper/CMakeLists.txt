@@ -11,6 +11,10 @@ target_link_libraries(efiboothelper PRIVATE
     QEFI::QEFI
 )
 
+target_include_directories(efiboothelper PRIVATE
+    ${CMAKE_SOURCE_DIR}/third_party/qefivar
+)
+
 install(TARGETS efiboothelper DESTINATION ${KDE_INSTALL_LIBEXECDIR}/kauth)
 
 # KAuth action definitions + polkit policy
