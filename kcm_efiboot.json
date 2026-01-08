@@ -1,0 +1,19 @@
+{
+    "KPlugin": {
+        "Description": "Manage EFI boot entries",
+        "FormFactors": [
+            "desktop",
+            "handset",
+            "tablet"
+        ],
+        "Icon": "computer",
+        "Id": "kcm_efiboot",
+        "Name": "EFI Boot",
+        "ServiceTypes": [
+            "KCModule"
+        ]
+    },
+    "X-KDE-System-Settings-Parent-Category": "startup-and-shutdown",
+    "X-KDE-Weight": 60
+}
+
