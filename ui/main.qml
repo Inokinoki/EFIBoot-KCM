@@ -15,6 +15,7 @@ KCMUtils.ScrollViewKCM {
     id: root
 
     property int selectedEntryId: -1
+    property string infoText: ""
 
     header: Kirigami.InlineMessage {
         visible: kcm.manager.lastError.length > 0
@@ -27,6 +28,22 @@ KCMUtils.ScrollViewKCM {
     view: ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
+        Connections {
+            target: kcm.manager
+            function onInfoMessage(text) {
+                root.infoText = text ?? ""
+            }
+        }
+
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: root.infoText.length > 0
+            text: root.infoText
+            type: Kirigami.MessageType.Information
+            showCloseButton: true
+            onCloseClicked: root.infoText = ""
+        }
+
         Kirigami.Heading {
             Layout.fillWidth: true
             text: i18nc("@title", "EFI Boot Entries")
@@ -37,6 +54,13 @@ KCMUtils.ScrollViewKCM {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             text: i18nc("@info", "Select the boot entry you want to use as the default, reboot to it once, or inspect its details.")
+        }
+
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: kcm.manager.available && !kcm.manager.hasPrivilege
+            type: Kirigami.MessageType.Information
+            text: i18nc("@info", "Listing boot entries may be restricted on some systems. You will only be asked for permission when changing the default or reboot target.")
         }
 
         Kirigami.PlaceholderMessage {
@@ -120,21 +144,21 @@ KCMUtils.ScrollViewKCM {
             QQC.Button {
                 text: i18nc("@action:button", "Set as Default")
                 icon.name: "emblem-favorite"
-                enabled: root.selectedEntryId >= 0 && !kcm.manager.busy
+                enabled: kcm.manager.available && root.selectedEntryId >= 0 && !kcm.manager.busy
                 onClicked: kcm.manager.setDefault(root.selectedEntryId)
             }
 
             QQC.Button {
                 text: i18nc("@action:button", "Reboot to…")
                 icon.name: "system-reboot"
-                enabled: root.selectedEntryId >= 0 && !kcm.manager.busy
+                enabled: kcm.manager.available && root.selectedEntryId >= 0 && !kcm.manager.busy
                 onClicked: rebootDialog.open()
             }
 
             QQC.Button {
                 text: i18nc("@action:button", "Details…")
                 icon.name: "documentinfo"
-                enabled: root.selectedEntryId >= 0
+                enabled: kcm.manager.available && root.selectedEntryId >= 0
                 onClicked: detailsDialog.open()
             }
 

@@ -57,6 +57,7 @@ EfiBootManager::EfiBootManager(QObject *parent)
     : QObject(parent)
 {
     m_available = qefi_is_available();
+    m_hasPrivilege = qefi_has_privilege();
 }
 
 EfiBootEntryModel *EfiBootManager::entries()
@@ -67,6 +68,11 @@ EfiBootEntryModel *EfiBootManager::entries()
 bool EfiBootManager::available() const
 {
     return m_available;
+}
+
+bool EfiBootManager::hasPrivilege() const
+{
+    return m_hasPrivilege;
 }
 
 bool EfiBootManager::busy() const
@@ -85,6 +91,12 @@ void EfiBootManager::refresh()
     if (m_available != nowAvailable) {
         m_available = nowAvailable;
         Q_EMIT availableChanged();
+    }
+
+    const bool nowHasPrivilege = qefi_has_privilege();
+    if (m_hasPrivilege != nowHasPrivilege) {
+        m_hasPrivilege = nowHasPrivilege;
+        Q_EMIT hasPrivilegeChanged();
     }
 
     setLastError(QString());
@@ -149,6 +161,12 @@ void EfiBootManager::refresh()
 
     std::ranges::sort(entries, {}, &EfiBootEntryModel::Entry::id);
     m_entries.setEntries(std::move(entries));
+
+    if (m_entries.rowCount() == 0 && m_available && !m_hasPrivilege) {
+        // Listing should not trigger authentication; if the system restricts reads,
+        // show an informative message instead of prompting.
+        setLastError(i18n("No EFI boot entries could be read. This may require administrator privileges on your system."));
+    }
 }
 
 QVariantMap EfiBootManager::detailsForEntry(quint16 entryId) const
