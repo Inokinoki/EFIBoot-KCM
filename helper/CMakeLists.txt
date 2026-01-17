@@ -1,14 +1,21 @@
 # SPDX-FileCopyrightText: 2026
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-add_executable(efiboothelper efiboothelper.cpp)
+add_executable(efiboothelper
+    efiboothelper.cpp
+    ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefi.h
+    ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefi.cpp
+    ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefidpacpi.cpp
+    ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefidphw.cpp
+    ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefidpmedia.cpp
+    ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefidpmessage.cpp
+)
 set_target_properties(efiboothelper PROPERTIES OUTPUT_NAME "org.kde.kcm.efiboot.helper")
 
 target_link_libraries(efiboothelper PRIVATE
     Qt6::Core
     Qt6::DBus
     KF6::AuthCore
-    QEFI::QEFI
 )
 
 target_include_directories(efiboothelper PRIVATE

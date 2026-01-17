@@ -50,7 +50,7 @@ static std::vector<quint16> parseUint16Array(const QByteArray &data)
 
 static QString bootVarName(quint16 entryId)
 {
-    return QStringLiteral("Boot%1").arg(entryId, 4, 16, QLatin1Char('0')).toUpper();
+    return QStringLiteral("Boot%1").arg(entryId, 4, 16, QLatin1Char('0'));
 }
 
 EfiBootManager::EfiBootManager(QObject *parent)

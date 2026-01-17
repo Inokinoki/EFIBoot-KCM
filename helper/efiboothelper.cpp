@@ -56,14 +56,19 @@ class EfiBootHelper : public QObject
 public Q_SLOTS:
     KAuth::ActionReply setDefault(const QVariantMap &args)
     {
+        KAuth::ActionReply reply;
         if (!qefi_is_available()) {
-            return KAuth::ActionReply::ErrorReply(u"EFI variables are not available on this system."_s);
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"EFI variables are not available on this system."_s);
+            return reply;
         }
 
         bool ok = false;
         const quint16 entryId = static_cast<quint16>(args.value(u"entryId"_s).toUInt(&ok));
         if (!ok) {
-            return KAuth::ActionReply::ErrorReply(u"Missing or invalid entryId."_s);
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"Missing or invalid entryId."_s);
+            return reply;
         }
 
         const QUuid global = efiGlobalGuid();
@@ -81,21 +86,26 @@ public Q_SLOTS:
 
         qefi_set_variable(global, u"BootOrder"_s, encodeUint16Array(newOrder));
 
-        auto reply = KAuth::ActionReply::SuccessReply();
-        reply.addData({{u"info"_s, u"Default boot entry updated."_s}});
+        reply = KAuth::ActionReply::SuccessReply();
+        reply.addData(u"info"_s, u"Default boot entry updated."_s);
         return reply;
     }
 
     KAuth::ActionReply rebootTo(const QVariantMap &args)
     {
+        KAuth::ActionReply reply;
         if (!qefi_is_available()) {
-            return KAuth::ActionReply::ErrorReply(u"EFI variables are not available on this system."_s);
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"EFI variables are not available on this system."_s);
+            return reply;
         }
 
         bool ok = false;
         const quint16 entryId = static_cast<quint16>(args.value(u"entryId"_s).toUInt(&ok));
         if (!ok) {
-            return KAuth::ActionReply::ErrorReply(u"Missing or invalid entryId."_s);
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"Missing or invalid entryId."_s);
+            return reply;
         }
 
         const QUuid global = efiGlobalGuid();
@@ -103,7 +113,7 @@ public Q_SLOTS:
 
         if (qEnvironmentVariableIsSet("KCM_EFIBOOT_NO_REBOOT")) {
             auto reply = KAuth::ActionReply::SuccessReply();
-            reply.addData({{u"info"_s, u"BootNext set; reboot skipped (KCM_EFIBOOT_NO_REBOOT)."_s}});
+            reply.addData(u"info"_s, u"BootNext set; reboot skipped (KCM_EFIBOOT_NO_REBOOT)."_s);
             return reply;
         }
 

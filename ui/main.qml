@@ -11,7 +11,7 @@ import org.kde.kirigami as Kirigami
 
 pragma ComponentBehavior: Bound
 
-KCMUtils.ScrollViewKCM {
+KCMUtils.AbstractKCM {
     id: root
 
     property int selectedEntryId: -1
@@ -22,10 +22,9 @@ KCMUtils.ScrollViewKCM {
         text: kcm.manager.lastError
         type: Kirigami.MessageType.Error
         showCloseButton: true
-        onVisibleChanged: if (!visible) kcm.manager.refresh()
     }
 
-    view: ColumnLayout {
+    ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
         Connections {
@@ -41,7 +40,6 @@ KCMUtils.ScrollViewKCM {
             text: root.infoText
             type: Kirigami.MessageType.Information
             showCloseButton: true
-            onCloseClicked: root.infoText = ""
         }
 
         Kirigami.Heading {
@@ -54,13 +52,6 @@ KCMUtils.ScrollViewKCM {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             text: i18nc("@info", "Select the boot entry you want to use as the default, reboot to it once, or inspect its details.")
-        }
-
-        Kirigami.InlineMessage {
-            Layout.fillWidth: true
-            visible: kcm.manager.available && !kcm.manager.hasPrivilege
-            type: Kirigami.MessageType.Information
-            text: i18nc("@info", "Listing boot entries may be restricted on some systems. You will only be asked for permission when changing the default or reboot target.")
         }
 
         Kirigami.PlaceholderMessage {
@@ -104,14 +95,14 @@ KCMUtils.ScrollViewKCM {
                         Kirigami.Heading {
                             Layout.fillWidth: true
                             level: 4
-                            text: delegateRoot.model.name
+                            text: model.name
                             elide: Text.ElideRight
                         }
 
                         QQC.Label {
                             Layout.fillWidth: true
-                            text: delegateRoot.model.path.length > 0
-                                ? i18nc("@info:inlistbox", "Path: %1", delegateRoot.model.path)
+                            text: model.path.length > 0
+                                ? i18nc("@info:inlistbox", "Path: %1", model.path)
                                 : i18nc("@info:inlistbox", "Path: (not available)")
                             elide: Text.ElideRight
                             color: Kirigami.Theme.disabledTextColor
@@ -119,19 +110,26 @@ KCMUtils.ScrollViewKCM {
 
                         QQC.Label {
                             Layout.fillWidth: true
-                            text: i18nc("@info:inlistbox", "Entry ID: %1", delegateRoot.model.entryIdHex)
+                            text: i18nc("@info:inlistbox", "Entry ID: %1", model.entryIdHex)
                             elide: Text.ElideRight
                             color: Kirigami.Theme.disabledTextColor
                         }
                     }
 
                     Kirigami.Icon {
-                        visible: delegateRoot.model.isDefault
+                        visible: model.isDefault
                         source: "emblem-favorite"
                         implicitWidth: Kirigami.Units.iconSizes.smallMedium
                         implicitHeight: Kirigami.Units.iconSizes.smallMedium
-                        Kirigami.ToolTip.visible: hovered
-                        Kirigami.ToolTip.text: i18nc("@info:tooltip", "Default")
+
+                        HoverHandler {
+                            id: hoverHandler
+                        }
+
+                        QQC.ToolTip {
+                            visible: hoverHandler.hovered
+                            text: i18nc("@info:tooltip", "Default")
+                        }
                     }
                 }
             }
