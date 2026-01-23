@@ -20,6 +20,7 @@ public:
         PathRole,
         IsDefaultRole,
         IsVisibleRole,
+        IconNameRole,
     };
     Q_ENUM(Roles)
 

@@ -40,6 +40,27 @@ QVariant EfiBootEntryModel::data(const QModelIndex &index, int role) const
         return entry.isDefault;
     case IsVisibleRole:
         return entry.isVisible;
+    case IconNameRole: {
+        // Detect OS type based on path
+        const QString pathLower = entry.path.toLower();
+        const QString nameLower = entry.name.toLower();
+
+        if (pathLower.contains(QStringLiteral("microsoft")) || nameLower.contains(QStringLiteral("windows"))) {
+            return QStringLiteral("os-windows");
+        }
+        if (pathLower.contains(QStringLiteral("linux")) || nameLower.contains(QStringLiteral("linux")) ||
+            pathLower.contains(QStringLiteral("grub")) || nameLower.contains(QStringLiteral("grub")) ||
+            pathLower.contains(QStringLiteral("fedora")) || nameLower.contains(QStringLiteral("fedora")) ||
+            pathLower.contains(QStringLiteral("ubuntu")) || nameLower.contains(QStringLiteral("ubuntu")) ||
+            pathLower.contains(QStringLiteral("arch")) || nameLower.contains(QStringLiteral("arch"))) {
+            return QStringLiteral("os-linux");
+        }
+        if (pathLower.contains(QStringLiteral("freebsd")) || nameLower.contains(QStringLiteral("freebsd")) ||
+            pathLower.contains(QStringLiteral("bsd")) || nameLower.contains(QStringLiteral("bsd"))) {
+            return QStringLiteral("os-freebsd");
+        }
+        return QStringLiteral("computer");
+    }
     default:
         return {};
     }
@@ -54,6 +75,7 @@ QHash<int, QByteArray> EfiBootEntryModel::roleNames() const
         {PathRole, "path"},
         {IsDefaultRole, "isDefault"},
         {IsVisibleRole, "isVisible"},
+        {IconNameRole, "iconName"},
     };
 }
 
