@@ -11,167 +11,56 @@ import org.kde.kirigami as Kirigami
 
 pragma ComponentBehavior: Bound
 
-KCMUtils.AbstractKCM {
+KCMUtils.GridViewKCM {
     id: root
 
     property int selectedEntryId: -1
     property string infoText: ""
 
+    // KCM.SettingStateBinding {
+    //     configObject: kcm.splashScreenSettings
+    //     settingName: "theme"
+    //     extraEnabledConditions: !kcm.testing
+    // }
+
+    view.model: kcm.manager.entries
+    // view.currentIndex: kcm.sortModelPluginIndex(kcm.splashScreenSettings.theme)
+
     header: Kirigami.InlineMessage {
-        visible: kcm.manager.lastError.length > 0
-        text: kcm.manager.lastError
+        text: i18nc("@info:header", "EFI Startup Item")
         type: Kirigami.MessageType.Error
         showCloseButton: true
     }
 
-    ColumnLayout {
-        spacing: Kirigami.Units.largeSpacing
+    view.delegate: KCMUtils.GridDelegate {
+        id: delegate
 
-        Connections {
-            target: kcm.manager
-            function onInfoMessage(text) {
-                root.infoText = text ?? ""
+        text: model.display
+        toolTip: model.description
+
+        thumbnailAvailable: model.screenshot.toString() !== ""
+        thumbnail: Image {
+            anchors.fill: parent
+            source: model.screenshot
+            sourceSize: Qt.size(delegate.GridView.view.cellWidth * Screen.devicePixelRatio,
+                                delegate.GridView.view.cellHeight * Screen.devicePixelRatio)
+            opacity: model.pendingDeletion ? 0.3 : 1
+        }
+
+        actions: [
+            Kirigami.Action {
+                visible: model.pluginName !== "None"
+                icon.name: "media-playback-start"
+                tooltip: i18nc("@action:button", "Preview Splash Screen")
+                onTriggered: kcm.test(model.pluginName)
+            },
+            Kirigami.Action {
+                icon.name: model.pendingDeletion ? "edit-undo" : "edit-delete"
+                tooltip: i18nc("@action:button", "Uninstall")
+                enabled: model.uninstallable
+                onTriggered: model.pendingDeletion = !model.pendingDeletion
             }
-        }
-
-        Kirigami.InlineMessage {
-            Layout.fillWidth: true
-            visible: root.infoText.length > 0
-            text: root.infoText
-            type: Kirigami.MessageType.Information
-            showCloseButton: true
-        }
-
-        Kirigami.Heading {
-            Layout.fillWidth: true
-            text: i18nc("@title", "EFI Boot Entries")
-            level: 2
-        }
-
-        QQC.Label {
-            Layout.fillWidth: true
-            wrapMode: Text.WordWrap
-            text: i18nc("@info", "Select the boot entry you want to use as the default, reboot to it once, or inspect its details.")
-        }
-
-        Kirigami.PlaceholderMessage {
-            Layout.fillWidth: true
-            visible: !kcm.manager.available
-            text: i18nc("@info:placeholder", "EFI boot entries are not available on this system.")
-        }
-
-        ListView {
-            id: entriesView
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: kcm.manager.available
-            clip: true
-            model: kcm.manager.entries
-            currentIndex: -1
-
-            delegate: QQC.ItemDelegate {
-                id: delegateRoot
-                required property var model
-                required property int index
-
-                width: ListView.view.width
-                highlighted: root.selectedEntryId === model.entryId
-
-                onClicked: root.selectedEntryId = model.entryId
-
-                contentItem: RowLayout {
-                    spacing: Kirigami.Units.largeSpacing
-
-                    Kirigami.Icon {
-                        source: "drive-harddisk"
-                        implicitWidth: Kirigami.Units.iconSizes.medium
-                        implicitHeight: Kirigami.Units.iconSizes.medium
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: Kirigami.Units.smallSpacing
-
-                        Kirigami.Heading {
-                            Layout.fillWidth: true
-                            level: 4
-                            text: model.name
-                            elide: Text.ElideRight
-                        }
-
-                        QQC.Label {
-                            Layout.fillWidth: true
-                            text: model.path.length > 0
-                                ? i18nc("@info:inlistbox", "Path: %1", model.path)
-                                : i18nc("@info:inlistbox", "Path: (not available)")
-                            elide: Text.ElideRight
-                            color: Kirigami.Theme.disabledTextColor
-                        }
-
-                        QQC.Label {
-                            Layout.fillWidth: true
-                            text: i18nc("@info:inlistbox", "Entry ID: %1", model.entryIdHex)
-                            elide: Text.ElideRight
-                            color: Kirigami.Theme.disabledTextColor
-                        }
-                    }
-
-                    Kirigami.Icon {
-                        visible: model.isDefault
-                        source: "emblem-favorite"
-                        implicitWidth: Kirigami.Units.iconSizes.smallMedium
-                        implicitHeight: Kirigami.Units.iconSizes.smallMedium
-
-                        HoverHandler {
-                            id: hoverHandler
-                        }
-
-                        QQC.ToolTip {
-                            visible: hoverHandler.hovered
-                            text: i18nc("@info:tooltip", "Default")
-                        }
-                    }
-                }
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Kirigami.Units.smallSpacing
-
-            QQC.Button {
-                text: i18nc("@action:button", "Set as Default")
-                icon.name: "emblem-favorite"
-                enabled: kcm.manager.available && root.selectedEntryId >= 0 && !kcm.manager.busy
-                onClicked: kcm.manager.setDefault(root.selectedEntryId)
-            }
-
-            QQC.Button {
-                text: i18nc("@action:button", "Reboot to…")
-                icon.name: "system-reboot"
-                enabled: kcm.manager.available && root.selectedEntryId >= 0 && !kcm.manager.busy
-                onClicked: rebootDialog.open()
-            }
-
-            QQC.Button {
-                text: i18nc("@action:button", "Details…")
-                icon.name: "documentinfo"
-                enabled: kcm.manager.available && root.selectedEntryId >= 0
-                onClicked: detailsDialog.open()
-            }
-
-            Item { Layout.fillWidth: true }
-
-            QQC.BusyIndicator {
-                running: kcm.manager.busy
-                visible: running
-            }
-        }
-    }
-
-    EntryDetailsDialog {
-        id: detailsDialog
-        details: kcm.manager.detailsForEntry(root.selectedEntryId)
+        ]
     }
 
     QQC.Dialog {
