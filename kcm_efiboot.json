@@ -7,7 +7,6 @@
             "tablet"
         ],
         "Icon": "computer",
-        "Id": "kcm_efiboot",
         "Name": "EFI Boot",
         "ServiceTypes": [
             "KCModule"
