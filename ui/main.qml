@@ -49,15 +49,15 @@ KCMUtils.GridViewKCM {
 
         actions: [
             Kirigami.Action {
-                visible: model.pluginName !== "None"
-                icon.name: "media-playback-start"
-                tooltip: i18nc("@action:button", "Preview Splash Screen")
+                icon.name: "starred"
+                tooltip: i18nc("@action:button", "Set as default boot entry")
+                enabled: true
                 onTriggered: kcm.test(model.pluginName)
             },
             Kirigami.Action {
-                icon.name: model.pendingDeletion ? "edit-undo" : "edit-delete"
-                tooltip: i18nc("@action:button", "Uninstall")
-                enabled: model.uninstallable
+                icon.name: "system-reboot"
+                tooltip: i18nc("@action:button", "Set as one-time boot entry")
+                enabled: true
                 onTriggered: model.pendingDeletion = !model.pendingDeletion
             }
         ]
