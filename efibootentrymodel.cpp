@@ -73,9 +73,9 @@ static QString iconForDevicePath(const QByteArray &rawData)
             return QStringLiteral("computer");
         }
     case DP_ACPI:
-        return QStringLiteral("computer");
+        return QStringLiteral("preferences-system-startup");
     case DP_BIOSBoot:
-        return QStringLiteral("computer");
+        return QStringLiteral("preferences-system-startup");
     default:
         return QStringLiteral("computer");
     }
@@ -122,18 +122,18 @@ QVariant EfiBootEntryModel::data(const QModelIndex &index, int role) const
         const QString nameLower = entry.name.toLower();
 
         if (pathLower.contains(QStringLiteral("microsoft")) || nameLower.contains(QStringLiteral("windows"))) {
-            return QStringLiteral("os-windows");
+            return QStringLiteral("image-x-ico");
         }
         if (pathLower.contains(QStringLiteral("linux")) || nameLower.contains(QStringLiteral("linux")) ||
             pathLower.contains(QStringLiteral("grub")) || nameLower.contains(QStringLiteral("grub")) ||
             pathLower.contains(QStringLiteral("fedora")) || nameLower.contains(QStringLiteral("fedora")) ||
             pathLower.contains(QStringLiteral("ubuntu")) || nameLower.contains(QStringLiteral("ubuntu")) ||
             pathLower.contains(QStringLiteral("arch")) || nameLower.contains(QStringLiteral("arch"))) {
-            return QStringLiteral("os-linux");
+            return QStringLiteral("preferences-system-linux");
         }
         if (pathLower.contains(QStringLiteral("freebsd")) || nameLower.contains(QStringLiteral("freebsd")) ||
             pathLower.contains(QStringLiteral("bsd")) || nameLower.contains(QStringLiteral("bsd"))) {
-            return QStringLiteral("os-freebsd");
+            return QStringLiteral("application-x-desktop");
         }
 
         // Fallback: Detect icon from device path type
