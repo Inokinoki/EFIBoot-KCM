@@ -165,6 +165,7 @@ KCMUtils.GridViewKCM {
                 Kirigami.Icon {
                     anchors.centerIn: parent
                     source: "starred"
+                    color: "#FFC107"
                     width: Kirigami.Units.iconSizes.smallMedium
                     height: Kirigami.Units.iconSizes.smallMedium
                 }
