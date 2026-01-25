@@ -40,10 +40,11 @@ KCMUtils.GridViewKCM {
         toolTip: i18nc("@info:tooltip", "ID: ") + entryIdHex + (path ? "\n" + path : "")
 
         // Use icon name from model instead of screenshot
-        thumbnailAvailable: true
+        thumbnailAvailable: false
+        // TODO: Fix icon showing
         thumbnail: Image {
             anchors.fill: parent
-            source: delegate.iconName
+            source: "qrc:/icons/freeze/default.png"
             sourceSize: Qt.size(delegate.GridView.view.cellWidth * Screen.devicePixelRatio,
                                 delegate.GridView.view.cellHeight * Screen.devicePixelRatio)
         }
