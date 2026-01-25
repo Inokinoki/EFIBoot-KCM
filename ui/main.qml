@@ -60,20 +60,53 @@ KCMUtils.GridViewKCM {
 
         text: name
         subtitle: i18nc("@info:subtitle", "ID: ") + entryIdHex
-        toolTip: path
+        toolTip: isDefault ? i18nc("@info:tooltip", "[Default] ") + path : path
+
+        // Add a visual badge for default entry
+        Rectangle {
+            parent: delegate.background
+            anchors.fill: parent
+            color: "transparent"
+            border.width: delegate.isDefault ? 3 : 0
+            border.color: Kirigami.Theme.highlightColor
+            z: 1
+        }
 
         // Use icon name from model instead of screenshot
         thumbnailAvailable: iconName ? true : false
-        thumbnail: Kirigami.Icon {
-            source: iconName
+        thumbnail: Item {
             anchors.fill: parent
+
+            Kirigami.Icon {
+                source: iconName
+                anchors.fill: parent
+            }
+
+            // Default badge indicator
+            Rectangle {
+                visible: delegate.isDefault
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: Kirigami.Units.smallSpacing
+                width: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
+                height: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
+                color: Kirigami.Theme.backgroundColor
+                radius: width / 2
+
+                Kirigami.Icon {
+                    anchors.centerIn: parent
+                    source: "starred"
+                    width: Kirigami.Units.iconSizes.smallMedium
+                    height: Kirigami.Units.iconSizes.smallMedium
+                }
+            }
         }
 
         actions: [
             Kirigami.Action {
                 icon.name: "starred"
                 tooltip: delegate.isDefault ? 
-                    i18nc("@action:button", "Default boot entry") :
+                    i18nc("@action:button", "Already set as default boot entry") :
                     i18nc("@action:button", "Set as default boot entry")
                 enabled: !delegate.isDefault
                 onTriggered: kcm.manager.setDefault(delegate.entryId)
