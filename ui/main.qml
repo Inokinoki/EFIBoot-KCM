@@ -17,12 +17,6 @@ KCMUtils.GridViewKCM {
     property int selectedEntryId: -1
     property string infoText: ""
 
-    // KCM.SettingStateBinding {
-    //     configObject: kcm.splashScreenSettings
-    //     settingName: "theme"
-    //     extraEnabledConditions: !kcm.testing
-    // }
-
     view.model: kcm.manager.entries
     // view.currentIndex: kcm.sortModelPluginIndex(kcm.splashScreenSettings.theme)
 
@@ -43,13 +37,13 @@ KCMUtils.GridViewKCM {
         required property string iconName
 
         text: name
-        toolTip: path + i18nc("@info:tooltip", "\nEntry ID: ") + entryIdHex
+        toolTip: i18nc("@info:tooltip", "ID: ") + entryIdHex + (path ? "\n" + path : "")
 
         // Use icon name from model instead of screenshot
         thumbnailAvailable: true
         thumbnail: Image {
             anchors.fill: parent
-            source: "image://icon/" + delegate.iconName
+            source: delegate.iconName
             sourceSize: Qt.size(delegate.GridView.view.cellWidth * Screen.devicePixelRatio,
                                 delegate.GridView.view.cellHeight * Screen.devicePixelRatio)
         }
