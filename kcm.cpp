@@ -20,6 +20,9 @@ EfiBootKCM::EfiBootKCM(QObject *parent, const KPluginMetaData &data, const QVari
 {
     Q_UNUSED(args)
 
+    // Hide OK/Apply/Cancel buttons since changes are applied immediately via helper actions
+    setButtons(KQuickConfigModule::NoAdditionalButton);
+
     constexpr const char *uri = "org.kde.plasma.kcm.efiboot";
     qmlRegisterUncreatableType<EfiBootEntryModel>(uri, 1, 0, "EfiBootEntryModel", QStringLiteral("Provided by the KCM"));
     qmlRegisterUncreatableType<EfiBootManager>(uri, 1, 0, "EfiBootManager", QStringLiteral("Provided by the KCM"));
