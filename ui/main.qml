@@ -14,16 +14,38 @@ pragma ComponentBehavior: Bound
 KCMUtils.GridViewKCM {
     id: root
 
-    property int selectedEntryId: -1
     property string infoText: ""
 
     view.model: kcm.manager.entries
-    // view.currentIndex: kcm.sortModelPluginIndex(kcm.splashScreenSettings.theme)
 
     header: Kirigami.InlineMessage {
-        text: i18nc("@info:header", "EFI Startup Item")
+        id: headerMessage
+        visible: kcm.manager.lastError !== ""
+        text: kcm.manager.lastError
         type: Kirigami.MessageType.Error
         showCloseButton: true
+        actions: [
+            Kirigami.Action {
+                text: i18nc("@action:button", "Details")
+                icon.name: "dialog-information"
+                onTriggered: errorDialog.open()
+            }
+        ]
+    }
+
+    Connections {
+        target: kcm.manager
+        function onLastErrorChanged() {
+            if (kcm.manager.lastError !== "") {
+                // Show inline message for non-critical errors
+                headerMessage.visible = true
+            }
+        }
+        function onInfoMessage(text) {
+            // Show info messages
+            infoMessageDialog.text = text
+            infoMessageDialog.open()
+        }
     }
 
     view.delegate: KCMUtils.GridDelegate {
@@ -60,27 +82,38 @@ KCMUtils.GridViewKCM {
                 icon.name: "system-reboot"
                 tooltip: i18nc("@action:button", "Set as one-time boot entry")
                 enabled: true
-                onTriggered: {
-                    root.selectedEntryId = delegate.entryId
-                    rebootDialog.open()
-                }
+                onTriggered: kcm.manager.rebootTo(delegate.entryId)
             }
         ]
     }
 
     QQC.Dialog {
-        id: rebootDialog
-        title: i18nc("@title", "Reboot")
-        standardButtons: QQC.Dialog.Cancel | QQC.Dialog.Ok
+        id: errorDialog
+        title: i18nc("@title", "Error")
         modal: true
-
-        onAccepted: kcm.manager.rebootTo(root.selectedEntryId)
 
         contentItem: QQC.Label {
             width: Kirigami.Units.gridUnit * 22
             wrapMode: Text.WordWrap
-            text: i18nc("@info", "The computer will reboot into the selected EFI boot entry.")
+            text: kcm.manager.lastError
         }
+
+        standardButtons: QQC.Dialog.Ok
+    }
+
+    QQC.Dialog {
+        id: infoMessageDialog
+        title: i18nc("@title", "Information")
+        property string text: ""
+        modal: true
+
+        contentItem: QQC.Label {
+            width: Kirigami.Units.gridUnit * 22
+            wrapMode: Text.WordWrap
+            text: infoMessageDialog.text
+        }
+
+        standardButtons: QQC.Dialog.Ok
     }
 }
 

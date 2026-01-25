@@ -6,10 +6,6 @@
 #include <KAuth/ActionReply>
 #include <KAuth/HelperSupport>
 
-#include <QDBusConnection>
-#include <QDBusInterface>
-#include <QDBusMessage>
-#include <QProcess>
 #include <QtEndian>
 
 #include <algorithm>
@@ -111,27 +107,9 @@ public Q_SLOTS:
         const QUuid global = efiGlobalGuid();
         qefi_set_variable_uint16(global, u"BootNext"_s, entryId);
 
-        if (qEnvironmentVariableIsSet("KCM_EFIBOOT_NO_REBOOT")) {
-            auto reply = KAuth::ActionReply::SuccessReply();
-            reply.addData(u"info"_s, u"BootNext set; reboot skipped (KCM_EFIBOOT_NO_REBOOT)."_s);
-            return reply;
-        }
-
-        // Prefer logind, fallback to systemctl.
-        QDBusInterface login1(u"org.freedesktop.login1"_s,
-                              u"/org/freedesktop/login1"_s,
-                              u"org.freedesktop.login1.Manager"_s,
-                              QDBusConnection::systemBus());
-        if (login1.isValid()) {
-            const auto call = login1.call(u"Reboot"_s, true);
-            if (call.type() == QDBusMessage::ErrorMessage) {
-                QProcess::startDetached(u"systemctl"_s, {u"reboot"_s});
-            }
-        } else {
-            QProcess::startDetached(u"systemctl"_s, {u"reboot"_s});
-        }
-
-        return KAuth::ActionReply::SuccessReply();
+        reply = KAuth::ActionReply::SuccessReply();
+        reply.addData(u"info"_s, u"BootNext set. Reboot your system to boot into the selected entry."_s);
+        return reply;
     }
 };
 
