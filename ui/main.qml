@@ -18,6 +18,48 @@ KCMUtils.GridViewKCM {
 
     view.model: kcm.manager.entries
 
+    // Loading overlay
+    Kirigami.OverlaySheet {
+        id: loadingOverlay
+        parent: root
+        modal: true
+        showCloseButton: false
+        padding: Kirigami.Units.largeSpacing
+        visible: kcm.manager.busy
+
+        contentItem: ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+
+            QQC.BusyIndicator {
+                running: kcm.manager.busy
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            QQC.Label {
+                text: i18nc("@info:status", "Loading…")
+                Layout.alignment: Qt.AlignHCenter
+            }
+        }
+
+        onOpened: {
+            // Close automatically when no longer busy
+            if (!kcm.manager.busy) {
+                close()
+            }
+        }
+    }
+
+    // Add refresh button to the KCM header
+    actions: [
+        Kirigami.Action {
+            id: refreshAction
+            text: i18nc("@action:button", "Refresh")
+            icon.name: "view-refresh"
+            enabled: !kcm.manager.busy
+            onTriggered: kcm.manager.refresh()
+        }
+    ]
+
     header: Kirigami.InlineMessage {
         id: headerMessage
         visible: kcm.manager.lastError !== ""
@@ -35,6 +77,12 @@ KCMUtils.GridViewKCM {
 
     Connections {
         target: kcm.manager
+        function onBusyChanged() {
+            // Close loading overlay when no longer busy
+            if (!kcm.manager.busy && loadingOverlay.opened) {
+                loadingOverlay.close()
+            }
+        }
         function onLastErrorChanged() {
             if (kcm.manager.lastError !== "") {
                 // Show inline message for non-critical errors
