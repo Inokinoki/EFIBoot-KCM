@@ -20,6 +20,7 @@ public:
         PathRole,
         IsDefaultRole,
         IsVisibleRole,
+        IsBootNextRole,
         IconNameRole,
     };
     Q_ENUM(Roles)
@@ -30,6 +31,7 @@ public:
         QString path;
         bool isDefault = false;
         bool isVisible = true; // true if in BootOrder, false if disabled
+        bool isBootNext = false; // true if set for one-time boot
         QByteArray raw;
         QByteArray optionalData;
     };

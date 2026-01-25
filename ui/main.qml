@@ -104,6 +104,7 @@ KCMUtils.GridViewKCM {
         required property int entryId
         required property string entryIdHex
         required property bool isDefault
+        required property bool isBootNext
         required property string iconName
 
         text: name
@@ -115,8 +116,9 @@ KCMUtils.GridViewKCM {
             parent: delegate.background
             anchors.fill: parent
             color: "transparent"
-            border.width: delegate.isDefault ? 3 : 0
-            border.color: Kirigami.Theme.highlightColor
+            border.width: delegate.isDefault ? 3 : (delegate.isBootNext ? 2 : 0)
+            border.color: delegate.isDefault ? Kirigami.Theme.highlightColor :
+                          (delegate.isBootNext ? Kirigami.Theme.positiveTextColor : "transparent")
             z: 1
         }
 
@@ -130,7 +132,26 @@ KCMUtils.GridViewKCM {
                 anchors.fill: parent
             }
 
-            // Default badge indicator
+            // BootNext badge indicator (bottom-right corner)
+            Rectangle {
+                visible: delegate.isBootNext
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.margins: Kirigami.Units.smallSpacing
+                width: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
+                height: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
+                color: Kirigami.Theme.positiveBackgroundColor
+                radius: width / 2
+
+                Kirigami.Icon {
+                    anchors.centerIn: parent
+                    source: "go-next"
+                    width: Kirigami.Units.iconSizes.smallMedium
+                    height: Kirigami.Units.iconSizes.smallMedium
+                }
+            }
+
+            // Default badge indicator (top-right corner)
             Rectangle {
                 visible: delegate.isDefault
                 anchors.top: parent.top
@@ -161,8 +182,10 @@ KCMUtils.GridViewKCM {
             },
             Kirigami.Action {
                 icon.name: "system-reboot"
-                tooltip: i18nc("@action:button", "Set as one-time boot entry")
-                enabled: true
+                tooltip: delegate.isBootNext ?
+                    i18nc("@action:button", "Already set as one-time boot entry") :
+                    i18nc("@action:button", "Set as one-time boot entry")
+                enabled: !delegate.isBootNext
                 onTriggered: kcm.manager.rebootTo(delegate.entryId)
             }
         ]
