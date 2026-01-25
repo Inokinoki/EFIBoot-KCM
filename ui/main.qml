@@ -35,30 +35,40 @@ KCMUtils.GridViewKCM {
     view.delegate: KCMUtils.GridDelegate {
         id: delegate
 
-        text: model.display
-        toolTip: model.description
+        required property string name
+        required property string path
+        required property int entryId
+        required property string entryIdHex
+        required property bool isDefault
+        required property string iconName
 
-        thumbnailAvailable: model.screenshot.toString() !== ""
+        text: name
+        toolTip: path + i18nc("@info:tooltip", "\nEntry ID: ") + entryIdHex
+
+        // Use icon name from model instead of screenshot
+        thumbnailAvailable: true
         thumbnail: Image {
             anchors.fill: parent
-            source: model.screenshot
+            source: "image://icon/" + delegate.iconName
             sourceSize: Qt.size(delegate.GridView.view.cellWidth * Screen.devicePixelRatio,
                                 delegate.GridView.view.cellHeight * Screen.devicePixelRatio)
-            opacity: model.pendingDeletion ? 0.3 : 1
         }
 
         actions: [
             Kirigami.Action {
                 icon.name: "starred"
                 tooltip: i18nc("@action:button", "Set as default boot entry")
-                enabled: true
-                onTriggered: kcm.test(model.pluginName)
+                enabled: !delegate.isDefault
+                onTriggered: kcm.manager.setDefault(delegate.entryId)
             },
             Kirigami.Action {
                 icon.name: "system-reboot"
                 tooltip: i18nc("@action:button", "Set as one-time boot entry")
                 enabled: true
-                onTriggered: model.pendingDeletion = !model.pendingDeletion
+                onTriggered: {
+                    root.selectedEntryId = delegate.entryId
+                    rebootDialog.open()
+                }
             }
         ]
     }
