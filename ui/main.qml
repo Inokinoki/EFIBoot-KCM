@@ -37,7 +37,8 @@ KCMUtils.GridViewKCM {
         required property string iconName
 
         text: name
-        toolTip: i18nc("@info:tooltip", "ID: ") + entryIdHex + (path ? "\n" + path : "")
+        subtitle: i18nc("@info:subtitle", "ID: ") + entryIdHex
+        toolTip: path
 
         // Use icon name from model instead of screenshot
         thumbnailAvailable: false
