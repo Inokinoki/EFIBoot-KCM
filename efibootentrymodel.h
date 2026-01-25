@@ -29,7 +29,7 @@ public:
         QString name;
         QString path;
         bool isDefault = false;
-        bool isVisible = true;
+        bool isVisible = true; // true if in BootOrder, false if disabled
         QByteArray raw;
         QByteArray optionalData;
     };

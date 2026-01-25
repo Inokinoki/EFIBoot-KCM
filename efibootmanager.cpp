@@ -9,8 +9,6 @@
 #include <KAuth/ExecuteJob>
 #include <KLocalizedString>
 
-#include <QDir>
-#include <QRegularExpression>
 #include <QtEndian>
 
 #include <algorithm>
@@ -22,15 +20,6 @@ using namespace Qt::StringLiterals;
 static QUuid efiGlobalGuid()
 {
     return QUuid(QStringLiteral("8be4df61-93ca-11d2-aa0d-00e098032b8c"));
-}
-
-static QString efivarfsPath()
-{
-    const QString fromEnv = qEnvironmentVariable("EFIVARFS_PATH");
-    if (!fromEnv.isEmpty()) {
-        return fromEnv;
-    }
-    return QStringLiteral("/sys/firmware/efi/efivars/");
 }
 
 static std::vector<quint16> parseUint16Array(const QByteArray &data)
@@ -111,33 +100,12 @@ void EfiBootManager::refresh()
     const auto bootOrder = parseUint16Array(qefi_get_variable(global, u"BootOrder"_s));
     const quint16 defaultId = bootOrder.empty() ? 0 : bootOrder.front();
 
-    QDir dir(efivarfsPath());
-    const QStringList files = dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
-
-    static const QRegularExpression bootVarRe(QStringLiteral(R"(^Boot([0-9A-Fa-f]{4})-([0-9A-Fa-f-]{36})$)"));
-
     std::vector<EfiBootEntryModel::Entry> entries;
-    entries.reserve(static_cast<size_t>(files.size()));
+    entries.reserve(bootOrder.size());
 
-    const QString guidWithDashes = global.toString(QUuid::WithoutBraces).toLower();
-
-    for (const QString &file : files) {
-        const auto match = bootVarRe.match(file);
-        if (!match.hasMatch()) {
-            continue;
-        }
-
-        const QString fileGuid = match.captured(2).toLower();
-        if (fileGuid != guidWithDashes) {
-            continue;
-        }
-
-        bool ok = false;
-        const quint16 entryId = match.captured(1).toUShort(&ok, 16);
-        if (!ok) {
-            continue;
-        }
-
+    // Read only the boot entries listed in BootOrder (these are the active ones)
+    for (const quint16 entryId : bootOrder) {
+        // Use qefi utility to read the boot variable data
         const QByteArray raw = qefi_get_variable(global, bootVarName(entryId));
         if (raw.isEmpty()) {
             continue;
