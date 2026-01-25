@@ -50,7 +50,9 @@ KCMUtils.GridViewKCM {
         actions: [
             Kirigami.Action {
                 icon.name: "starred"
-                tooltip: i18nc("@action:button", "Set as default boot entry")
+                tooltip: delegate.isDefault ? 
+                    i18nc("@action:button", "Default boot entry") :
+                    i18nc("@action:button", "Set as default boot entry")
                 enabled: !delegate.isDefault
                 onTriggered: kcm.manager.setDefault(delegate.entryId)
             },
