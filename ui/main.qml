@@ -41,13 +41,10 @@ KCMUtils.GridViewKCM {
         toolTip: path
 
         // Use icon name from model instead of screenshot
-        thumbnailAvailable: false
-        // TODO: Fix icon showing
-        thumbnail: Image {
+        thumbnailAvailable: iconName ? true : false
+        thumbnail: Kirigami.Icon {
+            source: iconName
             anchors.fill: parent
-            source: "qrc:/icons/freeze/default.png"
-            sourceSize: Qt.size(delegate.GridView.view.cellWidth * Screen.devicePixelRatio,
-                                delegate.GridView.view.cellHeight * Screen.devicePixelRatio)
         }
 
         actions: [
