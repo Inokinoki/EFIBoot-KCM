@@ -1,0 +1,109 @@
+# SPDX-FileCopyrightText: 2026
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  fedora:
+    name: Build on Fedora
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+        dnf install -y \
+          cmake \
+          extra-cmake-modules \
+          qt6-qtbase-devel \
+          qt6-qtdeclarative-devel \
+          qt6-qtsvg-devel \
+          kf6-kcoreaddons-devel \
+          kf6-ki18n-devel \
+          kf6-kcmutils-devel \
+          kf6-kauth-devel \
+          qt6-qttools-devel \
+          gcc-c++ \
+          efivar-devel \
+          git
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DBUILD_TESTING=ON
+
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+
+    - name: Install
+      run: |
+        cd build
+        make install DESTDIR=$PWD/install
+
+  arch-linux:
+    name: Build on Arch Linux
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+        # Update system and install dependencies in one go
+        pacman --noconfirm -Syu
+        # Install required dependencies
+        pacman --noconfirm -S --needed \
+          base-devel \
+          cmake \
+          extra-cmake-modules \
+          qt6-base \
+          qt6-declarative \
+          qt6-tools \
+          kcoreaddons \
+          ki18n \
+          kcmutils \
+          kauth \
+          efivar \
+          git
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DBUILD_TESTING=ON
+
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+
+    - name: Install
+      run: |
+        cd build
+        make install DESTDIR=$PWD/install
