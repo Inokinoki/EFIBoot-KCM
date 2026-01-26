@@ -103,6 +103,9 @@ void EfiBootManager::refresh()
     // Read BootNext to get one-time boot entry
     const auto bootNext = qefi_get_variable_uint16(global, u"BootNext"_s);
 
+    // Read BootCurrent to get the currently booted entry
+    const auto bootCurrent = qefi_get_variable_uint16(global, u"BootCurrent"_s);
+
     std::vector<EfiBootEntryModel::Entry> entries;
     entries.reserve(bootOrder.size());
 
@@ -126,6 +129,7 @@ void EfiBootManager::refresh()
         entry.isVisible = opt.isVisible();
         entry.isDefault = (defaultId != 0) && (entryId == defaultId);
         entry.isBootNext = (bootNext != 0 && bootNext == entryId);
+        entry.isCurrent = (bootCurrent != 0 && bootCurrent == entryId);
         entry.raw = raw;
         entry.optionalData = qefi_extract_optional_data(raw);
         entries.push_back(std::move(entry));
