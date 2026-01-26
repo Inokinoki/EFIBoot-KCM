@@ -23,6 +23,7 @@ jobs:
           extra-cmake-modules \
           qt6-qtbase-devel \
           qt6-qtdeclarative-devel \
+          qt6-qtsvg-devel \
           kf6-kcoreaddons-devel \
           kf6-ki18n-devel \
           kf6-kcmutils-devel \
@@ -72,8 +73,8 @@ jobs:
           qt6-base \
           qt6-declarative \
           qt6-tools \
-          kf6-kcoreaddons \
-          kf6-ki18n \
+          kf6-coreaddons \
+          kf6-i18n \
           kf6-kcmutils \
           kf6-kauth \
           efivar \
