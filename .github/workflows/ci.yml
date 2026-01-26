@@ -5,12 +5,13 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
   fedora:
+    name: Build on Fedora
     runs-on: ubuntu-latest
     container:
       image: fedora:latest
@@ -58,6 +59,7 @@ jobs:
         make install DESTDIR=$PWD/install
 
   arch-linux:
+    name: Build on Arch Linux
     runs-on: ubuntu-latest
     container:
       image: archlinux:latest
