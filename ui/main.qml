@@ -128,9 +128,10 @@ KCMUtils.GridViewKCM {
         required property string entryIdHex
         required property bool isDefault
         required property bool isBootNext
+        required property bool isCurrent
         required property string iconName
 
-        text: name
+        text: delegate.isCurrent ? i18nc("@item:inlistbox", "[Current] ") + name : name
         subtitle: i18nc("@info:subtitle", "ID: ") + entryIdHex
         toolTip: {
             let tooltip = path
@@ -138,7 +139,7 @@ KCMUtils.GridViewKCM {
                 tooltip = i18nc("@info:tooltip", "[Default] ") + tooltip
             }
             if (delegate.isBootNext) {
-                tooltip = i18nc("@info:tooltip", "[Next boot] ") + tooltip
+                tooltip = i18nc("@info:tooltip", "[Next] ") + tooltip
             }
             return tooltip
         }
@@ -148,9 +149,10 @@ KCMUtils.GridViewKCM {
             parent: delegate.background
             anchors.fill: parent
             color: "transparent"
-            border.width: delegate.isDefault ? 3 : (delegate.isBootNext ? 2 : 0)
-            border.color: delegate.isDefault ? Kirigami.Theme.highlightColor :
-                          (delegate.isBootNext ? Kirigami.Theme.positiveTextColor : "transparent")
+            border.width: delegate.isCurrent ? 4 : (delegate.isDefault ? 3 : (delegate.isBootNext ? 2 : 0))
+            border.color: delegate.isCurrent ? Kirigami.Theme.neutralTextColor :
+                          (delegate.isDefault ? Kirigami.Theme.highlightColor :
+                          (delegate.isBootNext ? Kirigami.Theme.positiveTextColor : "transparent"))
             z: 1
         }
 
@@ -162,6 +164,26 @@ KCMUtils.GridViewKCM {
             Kirigami.Icon {
                 source: iconName
                 anchors.fill: parent
+            }
+
+            // Current boot badge indicator (top-left corner)
+            Rectangle {
+                visible: delegate.isCurrent
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.margins: Kirigami.Units.smallSpacing
+                width: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
+                height: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
+                color: Kirigami.Theme.backgroundColor
+                radius: width / 2
+
+                Kirigami.Icon {
+                    anchors.centerIn: parent
+                    source: "media-playback-start"
+                    color: Kirigami.Theme.neutralTextColor
+                    width: Kirigami.Units.iconSizes.smallMedium
+                    height: Kirigami.Units.iconSizes.smallMedium
+                }
             }
 
             // BootNext badge indicator (bottom-right corner)

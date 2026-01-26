@@ -116,6 +116,8 @@ QVariant EfiBootEntryModel::data(const QModelIndex &index, int role) const
         return entry.isVisible;
     case IsBootNextRole:
         return entry.isBootNext;
+    case IsCurrentRole:
+        return entry.isCurrent;
     case IconNameRole: {
         // First prioritize OS type detection based on path and name
         const QString pathLower = entry.path.toLower();
@@ -159,6 +161,7 @@ QHash<int, QByteArray> EfiBootEntryModel::roleNames() const
         {IsDefaultRole, "isDefault"},
         {IsVisibleRole, "isVisible"},
         {IsBootNextRole, "isBootNext"},
+        {IsCurrentRole, "isCurrent"},
         {IconNameRole, "iconName"},
     };
 }

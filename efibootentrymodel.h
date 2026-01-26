@@ -21,6 +21,7 @@ public:
         IsDefaultRole,
         IsVisibleRole,
         IsBootNextRole,
+        IsCurrentRole,
         IconNameRole,
     };
     Q_ENUM(Roles)
@@ -32,6 +33,7 @@ public:
         bool isDefault = false;
         bool isVisible = true; // true if in BootOrder, false if disabled
         bool isBootNext = false; // true if set for one-time boot
+        bool isCurrent = false; // true if this is the current booted entry
         QByteArray raw;
         QByteArray optionalData;
     };
