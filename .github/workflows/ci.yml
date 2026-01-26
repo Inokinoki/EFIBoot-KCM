@@ -1,0 +1,104 @@
+# SPDX-FileCopyrightText: 2026
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  fedora:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+        dnf install -y \
+          cmake \
+          extra-cmake-modules \
+          qt6-qtbase-devel \
+          qt6-qtdeclarative-devel \
+          kf6-kcoreaddons-devel \
+          kf6-ki18n-devel \
+          kf6-kcmutils-devel \
+          kf6-kauth-devel \
+          qt6-qttools \
+          gcc-c++ \
+          efivar-libs \
+          git
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DBUILD_TESTING=ON
+
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+
+    - name: Install
+      run: |
+        cd build
+        make install DESTDIR=$PWD/install
+
+  arch-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+        # Update package databases
+        pacman -Sy
+        # Install base development tools
+        pacman --noconfirm -S base-devel
+        # Install required dependencies
+        pacman --noconfirm -S \
+          cmake \
+          extra-cmake-modules \
+          qt6-base \
+          qt6-declarative \
+          qt6-tools \
+          kf6-kcoreaddons \
+          kf6-ki18n \
+          kf6-kcmutils \
+          kf6-kauth \
+          gcc \
+          efivar \
+          git
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DBUILD_TESTING=ON
+
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+
+    - name: Install
+      run: |
+        cd build
+        make install DESTDIR=$PWD/install
