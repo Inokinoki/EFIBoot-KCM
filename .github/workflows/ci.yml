@@ -27,9 +27,9 @@ jobs:
           kf6-ki18n-devel \
           kf6-kcmutils-devel \
           kf6-kauth-devel \
-          qt6-qttools \
+          qt6-qttools-devel \
           gcc-c++ \
-          efivar-libs \
+          efivar-devel \
           git
 
     - name: Checkout code
@@ -62,12 +62,11 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        # Update package databases
-        pacman -Sy
-        # Install base development tools
-        pacman --noconfirm -S base-devel
+        # Update system and install dependencies in one go
+        pacman --noconfirm -Syu
         # Install required dependencies
-        pacman --noconfirm -S \
+        pacman --noconfirm -S --needed \
+          base-devel \
           cmake \
           extra-cmake-modules \
           qt6-base \
@@ -77,7 +76,6 @@ jobs:
           kf6-ki18n \
           kf6-kcmutils \
           kf6-kauth \
-          gcc \
           efivar \
           git
 
