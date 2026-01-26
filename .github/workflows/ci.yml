@@ -35,6 +35,8 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Configure CMake
       run: |
@@ -73,15 +75,17 @@ jobs:
           qt6-base \
           qt6-declarative \
           qt6-tools \
-          kf6-coreaddons \
-          kf6-i18n \
-          kf6-kcmutils \
-          kf6-kauth \
+          kcoreaddons \
+          ki18n \
+          kcmutils \
+          kauth \
           efivar \
           git
 
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Configure CMake
       run: |
