@@ -18,13 +18,25 @@ KCMUtils.GridViewKCM {
 
     view.model: kcm.manager.entries
 
+    // Empty state placeholder
+    QQC.Label {
+        visible: kcm.manager.entries.rowCount === 0 && !kcm.manager.busy
+        anchors.centerIn: parent
+        text: i18nc("@info:placeholder", "No EFI boot entries found")
+        horizontalAlignment: Text.AlignHCenter
+        textFormat: Text.PlainText
+        font.pointSize: -1
+        font.pixelSize: Kirigami.Theme.defaultFont.pixelSize * 1.2
+        opacity: 0.7
+    }
+
     // Loading overlay
     Kirigami.OverlaySheet {
         id: loadingOverlay
         parent: root
         modal: true
         showCloseButton: false
-        padding: Kirigami.Units.largeSpacing
+        padding: Kirigami.Units.largeSpacing * 2
         visible: kcm.manager.busy
 
         contentItem: ColumnLayout {
@@ -33,11 +45,22 @@ KCMUtils.GridViewKCM {
             QQC.BusyIndicator {
                 running: kcm.manager.busy
                 Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: Kirigami.Units.iconSizes.huge
+                Layout.preferredHeight: Kirigami.Units.iconSizes.huge
             }
 
             QQC.Label {
-                text: i18nc("@info:status", "Loading…")
+                text: i18nc("@info:status", "Loading EFI boot entries…")
                 Layout.alignment: Qt.AlignHCenter
+                font.pointSize: -1
+                font.pixelSize: Kirigami.Theme.defaultFont.pixelSize * 1.1
+            }
+
+            QQC.Label {
+                text: i18nc("@info:status", "This may take a moment")
+                Layout.alignment: Qt.AlignHCenter
+                font.pointSize: -1
+                opacity: 0.7
             }
         }
 
@@ -109,9 +132,18 @@ KCMUtils.GridViewKCM {
 
         text: name
         subtitle: i18nc("@info:subtitle", "ID: ") + entryIdHex
-        toolTip: isDefault ? i18nc("@info:tooltip", "[Default] ") + path : path
+        toolTip: {
+            let tooltip = path
+            if (delegate.isDefault) {
+                tooltip = i18nc("@info:tooltip", "[Default] ") + tooltip
+            }
+            if (delegate.isBootNext) {
+                tooltip = i18nc("@info:tooltip", "[Next boot] ") + tooltip
+            }
+            return tooltip
+        }
 
-        // Add a visual badge for default entry
+        // Add visual badge
         Rectangle {
             parent: delegate.background
             anchors.fill: parent
@@ -138,10 +170,11 @@ KCMUtils.GridViewKCM {
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 anchors.margins: Kirigami.Units.smallSpacing
-                width: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
-                height: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
+                width: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 1.5
+                height: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 1.5
                 color: Kirigami.Theme.positiveBackgroundColor
                 radius: width / 2
+                z: 2
 
                 Kirigami.Icon {
                     anchors.centerIn: parent
@@ -175,17 +208,24 @@ KCMUtils.GridViewKCM {
         actions: [
             Kirigami.Action {
                 icon.name: "starred"
-                tooltip: delegate.isDefault ? 
+                icon.color: delegate.isDefault ? "#FFC107" : Kirigami.Theme.textColor
+                text: delegate.isDefault ?
+                    i18nc("@action:button", "Default") :
+                    i18nc("@action:button", "Set Default")
+                tooltip: delegate.isDefault ?
                     i18nc("@action:button", "Already set as default boot entry") :
-                    i18nc("@action:button", "Set as default boot entry")
+                    i18nc("@action:button", "Set this entry as the default boot option")
                 enabled: !delegate.isDefault
                 onTriggered: kcm.manager.setDefault(delegate.entryId)
             },
             Kirigami.Action {
                 icon.name: "system-reboot"
+                text: delegate.isBootNext ?
+                    i18nc("@action:button", "Next Boot") :
+                    i18nc("@action:button", "Boot to this entry once")
                 tooltip: delegate.isBootNext ?
                     i18nc("@action:button", "Already set as one-time boot entry") :
-                    i18nc("@action:button", "Set as one-time boot entry")
+                    i18nc("@action:button", "Boot this entry once (next reboot only)")
                 enabled: !delegate.isBootNext
                 onTriggered: kcm.manager.rebootTo(delegate.entryId)
             }
