@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=cc.inoki.efibootkcm.helper
+Exec=/usr/libexec/kf6/kauth/cc.inoki.efibootkcm.helper
+User=root

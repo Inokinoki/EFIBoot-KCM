@@ -7,10 +7,10 @@ SPDX-FileCopyrightText: 2026
 SPDX-License-Identifier: GPL-2.0-or-later
 -->
 <policyconfig>
-  <vendor>KDE</vendor>
-  <vendor_url>https://kde.org/</vendor_url>
+  <vendor>cc.inoki</vendor>
+  <vendor_url>https://github.com/Inokinoki</vendor_url>
 
-  <action id="org.kde.kcm.efiboot.setdefault">
+  <action id="cc.inoki.efibootkcm.setdefault">
     <description>Set default EFI boot entry</description>
     <message>Authentication is required to change EFI boot order.</message>
     <defaults>
@@ -20,7 +20,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
     </defaults>
   </action>
 
-  <action id="org.kde.kcm.efiboot.rebootto">
+  <action id="cc.inoki.efibootkcm.rebootto">
     <description>Reboot to EFI boot entry</description>
     <message>Authentication is required to reboot into a selected EFI boot entry.</message>
     <defaults>

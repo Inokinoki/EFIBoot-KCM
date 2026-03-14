@@ -50,12 +50,12 @@ class EfiBootHelper : public QObject
     Q_OBJECT
 
 public Q_SLOTS:
-    KAuth::ActionReply org_kde_kcm_efiboot_setdefault(const QVariantMap &args)
+    KAuth::ActionReply cc_inoki_efibootkcm_setdefault(const QVariantMap &args)
     {
         return setDefault(args);
     }
 
-    KAuth::ActionReply org_kde_kcm_efiboot_rebootto(const QVariantMap &args)
+    KAuth::ActionReply cc_inoki_efibootkcm_rebootto(const QVariantMap &args)
     {
         return rebootTo(args);
     }
@@ -170,7 +170,7 @@ public Q_SLOTS:
     }
 };
 
-KAUTH_HELPER_MAIN("org.kde.kcm.efiboot.helper", EfiBootHelper)
+KAUTH_HELPER_MAIN("cc.inoki.efibootkcm.helper", EfiBootHelper)
 
 #include "efiboothelper.moc"
 

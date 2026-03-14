@@ -161,12 +161,12 @@ QVariantMap EfiBootManager::detailsForEntry(quint16 entryId) const
 
 void EfiBootManager::setDefault(quint16 entryId)
 {
-    runAuthAction(u"org.kde.kcm.efiboot.setdefault"_s, {{u"entryId"_s, entryId}});
+    runAuthAction(u"cc.inoki.efibootkcm.setdefault"_s, {{u"entryId"_s, entryId}});
 }
 
 void EfiBootManager::rebootTo(quint16 entryId)
 {
-    runAuthAction(u"org.kde.kcm.efiboot.rebootto"_s, {{u"entryId"_s, entryId}});
+    runAuthAction(u"cc.inoki.efibootkcm.rebootto"_s, {{u"entryId"_s, entryId}});
 }
 
 void EfiBootManager::runAuthAction(const QString &actionId, const QVariantMap &args)
@@ -184,7 +184,7 @@ void EfiBootManager::runAuthAction(const QString &actionId, const QVariantMap &a
     setLastError(QString());
 
     KAuth::Action action(actionId);
-    action.setHelperId(QStringLiteral("org.kde.kcm.efiboot.helper"));
+    action.setHelperId(QStringLiteral("cc.inoki.efibootkcm.helper"));
     for (auto it = args.cbegin(); it != args.cend(); ++it) {
         action.addArgument(it.key(), it.value());
     }

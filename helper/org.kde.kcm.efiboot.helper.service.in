@@ -1,4 +1,0 @@
-[D-BUS Service]
-Name=org.kde.kcm.efiboot.helper
-Exec=/usr/libexec/kf6/kauth/org.kde.kcm.efiboot.helper
-User=root
