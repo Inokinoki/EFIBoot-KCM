@@ -46,7 +46,6 @@ EfiBootManager::EfiBootManager(QObject *parent)
     : QObject(parent)
 {
     m_available = qefi_is_available();
-    m_hasPrivilege = qefi_has_privilege();
 }
 
 EfiBootEntryModel *EfiBootManager::entries()
@@ -57,11 +56,6 @@ EfiBootEntryModel *EfiBootManager::entries()
 bool EfiBootManager::available() const
 {
     return m_available;
-}
-
-bool EfiBootManager::hasPrivilege() const
-{
-    return m_hasPrivilege;
 }
 
 bool EfiBootManager::busy() const
@@ -80,12 +74,6 @@ void EfiBootManager::refresh()
     if (m_available != nowAvailable) {
         m_available = nowAvailable;
         Q_EMIT availableChanged();
-    }
-
-    const bool nowHasPrivilege = qefi_has_privilege();
-    if (m_hasPrivilege != nowHasPrivilege) {
-        m_hasPrivilege = nowHasPrivilege;
-        Q_EMIT hasPrivilegeChanged();
     }
 
     setLastError(QString());
@@ -127,9 +115,9 @@ void EfiBootManager::refresh()
         entry.name = opt.name().isEmpty() ? i18nc("@item:inlistbox", "(Unnamed entry)") : opt.name();
         entry.path = opt.path();
         entry.isVisible = opt.isVisible();
-        entry.isDefault = (defaultId != 0) && (entryId == defaultId);
-        entry.isBootNext = (bootNext != 0 && bootNext == entryId);
-        entry.isCurrent = (bootCurrent != 0 && bootCurrent == entryId);
+        entry.isDefault = (entryId == defaultId);
+        entry.isBootNext = (bootNext == entryId);
+        entry.isCurrent = (bootCurrent == entryId);
         entry.raw = raw;
         entry.optionalData = qefi_extract_optional_data(raw);
         entries.push_back(std::move(entry));
@@ -138,10 +126,8 @@ void EfiBootManager::refresh()
     std::ranges::sort(entries, {}, &EfiBootEntryModel::Entry::id);
     m_entries.setEntries(std::move(entries));
 
-    if (m_entries.rowCount() == 0 && m_available && !m_hasPrivilege) {
-        // Listing should not trigger authentication; if the system restricts reads,
-        // show an informative message instead of prompting.
-        setLastError(i18n("No EFI boot entries could be read. This may require administrator privileges on your system."));
+    if (m_entries.rowCount() == 0 && m_available) {
+        setLastError(i18n("No EFI boot entries could be read."));
     }
 }
 
@@ -175,12 +161,12 @@ QVariantMap EfiBootManager::detailsForEntry(quint16 entryId) const
 
 void EfiBootManager::setDefault(quint16 entryId)
 {
-    runAuthAction(u"org.kde.kcm.efiboot.setdefault"_s, {{u"entryId"_s, entryId}});
+    runAuthAction(u"cc.inoki.efibootkcm.setdefault"_s, {{u"entryId"_s, entryId}});
 }
 
 void EfiBootManager::rebootTo(quint16 entryId)
 {
-    runAuthAction(u"org.kde.kcm.efiboot.rebootto"_s, {{u"entryId"_s, entryId}});
+    runAuthAction(u"cc.inoki.efibootkcm.rebootto"_s, {{u"entryId"_s, entryId}});
 }
 
 void EfiBootManager::runAuthAction(const QString &actionId, const QVariantMap &args)
@@ -198,29 +184,64 @@ void EfiBootManager::runAuthAction(const QString &actionId, const QVariantMap &a
     setLastError(QString());
 
     KAuth::Action action(actionId);
-    action.setHelperId(QStringLiteral("org.kde.kcm.efiboot.helper"));
+    action.setHelperId(QStringLiteral("cc.inoki.efibootkcm.helper"));
     for (auto it = args.cbegin(); it != args.cend(); ++it) {
         action.addArgument(it.key(), it.value());
     }
 
     auto *job = action.execute();
     job->setAutoDelete(true);
-    connect(job, &KJob::result, this, [this, job] {
+    connect(job, &KJob::result, this, [this, job, actionId] {
         setBusy(false);
 
+        // Log detailed error information
+        qDebug() << "Action:" << actionId;
+        qDebug() << "Job error:" << job->error();
+        qDebug() << "Job error text:" << job->errorText();
+        qDebug() << "Job data:" << job->data();
+
         if (job->error() != 0) {
-            setLastError(job->errorText());
+            const QString errorMsg = job->errorText();
+            const QString finalError = errorMsg.isEmpty()
+                ? i18n("Authentication or execution failed. Check system logs for details.")
+                : errorMsg;
+            setLastError(finalError);
+            Q_EMIT operationResult(false, finalError);
             return;
         }
 
         const QVariantMap data = job->data();
+
+        // Check for error from helper (ActionReply error)
         if (const auto error = data.value(u"error"_s).toString(); !error.isEmpty()) {
             setLastError(error);
+            Q_EMIT operationResult(false, error);
             return;
         }
 
+        // Check for error description from ActionReply
+        if (const auto errorDesc = data.value(u"errorDescription"_s).toString(); !errorDesc.isEmpty()) {
+            setLastError(errorDesc);
+            Q_EMIT operationResult(false, errorDesc);
+            return;
+        }
+
+        // Check for custom error code from helper
+        if (data.value(u"errorCode"_s).toInt() != 0) {
+            const auto errorDesc = data.value(u"errorDescription"_s).toString();
+            const QString errorMsg = errorDesc.isEmpty()
+                ? i18n("Helper action failed with error code %1").arg(data.value(u"errorCode"_s).toInt())
+                : errorDesc;
+            setLastError(errorMsg);
+            Q_EMIT operationResult(false, errorMsg);
+            return;
+        }
+
+        // Check for success with info message
         if (const auto info = data.value(u"info"_s).toString(); !info.isEmpty()) {
-            Q_EMIT infoMessage(info);
+            Q_EMIT operationResult(true, info);
+        } else {
+            Q_EMIT operationResult(true, i18n("Operation completed successfully."));
         }
 
         refresh();

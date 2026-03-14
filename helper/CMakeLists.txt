@@ -10,7 +10,7 @@ add_executable(efiboothelper
     ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefidpmedia.cpp
     ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefidpmessage.cpp
 )
-set_target_properties(efiboothelper PROPERTIES OUTPUT_NAME "org.kde.kcm.efiboot.helper")
+set_target_properties(efiboothelper PROPERTIES OUTPUT_NAME "cc.inoki.efibootkcm.helper")
 
 target_link_libraries(efiboothelper PRIVATE
     Qt6::Core
@@ -22,13 +22,18 @@ target_include_directories(efiboothelper PRIVATE
     ${CMAKE_SOURCE_DIR}/third_party/qefivar
 )
 
-install(TARGETS efiboothelper DESTINATION ${KDE_INSTALL_LIBEXECDIR}/kauth)
+install(TARGETS efiboothelper DESTINATION libexec/kf6/kauth)
 
 # KAuth action definitions + polkit policy
 if (NOT DEFINED KDE_INSTALL_KAUTH_ACTIONS_DIR)
     set(KDE_INSTALL_KAUTH_ACTIONS_DIR "${KDE_INSTALL_DATADIR}/kauth/actions")
 endif()
 
-install(FILES ${CMAKE_SOURCE_DIR}/org.kde.kcm.efiboot.actions DESTINATION ${KDE_INSTALL_KAUTH_ACTIONS_DIR})
-install(FILES ${CMAKE_SOURCE_DIR}/org.kde.kcm.efiboot.policy DESTINATION ${KDE_INSTALL_DATADIR}/polkit-1/actions)
+install(FILES ${CMAKE_SOURCE_DIR}/cc.inoki.efibootkcm.actions DESTINATION ${KDE_INSTALL_KAUTH_ACTIONS_DIR})
+install(FILES ${CMAKE_SOURCE_DIR}/cc.inoki.efibootkcm.policy DESTINATION ${KDE_INSTALL_DATADIR}/polkit-1/actions/)
+install(FILES ${CMAKE_SOURCE_DIR}/helper/cc.inoki.efibootkcm.helper.conf DESTINATION /etc/dbus-1/system.d/)
+
+# Configure and install D-Bus service file
+configure_file(cc.inoki.efibootkcm.helper.service.in cc.inoki.efibootkcm.helper.service @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cc.inoki.efibootkcm.helper.service DESTINATION ${KDE_INSTALL_DATADIR}/dbus-1/system-services/)
 

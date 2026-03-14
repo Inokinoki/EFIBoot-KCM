@@ -1,17 +1,17 @@
 # SPDX-FileCopyrightText: 2026
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-[org.kde.kcm.efiboot]
+[cc.inoki.efibootkcm]
 Name=EFI Boot
 Description=Manage EFI boot entries
 Icon=computer
 
-[org.kde.kcm.efiboot.setdefault]
+[cc.inoki.efibootkcm.setdefault]
 Name=Set default EFI boot entry
 Description=Change EFI boot order to make a selected entry default
 Policy=auth_admin_keep
 
-[org.kde.kcm.efiboot.rebootto]
+[cc.inoki.efibootkcm.rebootto]
 Name=Reboot to EFI boot entry
 Description=Set BootNext and reboot the system into the selected entry
 Policy=auth_admin_keep

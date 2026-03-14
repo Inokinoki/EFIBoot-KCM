@@ -17,7 +17,6 @@ class EfiBootManager : public QObject
     Q_OBJECT
     Q_PROPERTY(EfiBootEntryModel *entries READ entries CONSTANT)
     Q_PROPERTY(bool available READ available NOTIFY availableChanged)
-    Q_PROPERTY(bool hasPrivilege READ hasPrivilege NOTIFY hasPrivilegeChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
@@ -26,7 +25,6 @@ public:
 
     EfiBootEntryModel *entries();
     bool available() const;
-    bool hasPrivilege() const;
     bool busy() const;
     QString lastError() const;
 
@@ -37,10 +35,10 @@ public:
 
 Q_SIGNALS:
     void availableChanged();
-    void hasPrivilegeChanged();
     void busyChanged();
     void lastErrorChanged();
     void infoMessage(const QString &text);
+    void operationResult(bool success, const QString &message);
 
 private:
     void runAuthAction(const QString &actionId, const QVariantMap &args);
@@ -49,7 +47,6 @@ private:
 
     EfiBootEntryModel m_entries;
     bool m_available = false;
-    bool m_hasPrivilege = false;
     bool m_busy = false;
     QString m_lastError;
 };
