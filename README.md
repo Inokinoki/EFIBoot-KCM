@@ -1,5 +1,7 @@
 # EFI Boot Manager KCM
 
+[![CI](https://github.com/Inokinoki/EFIBoot-KCM/actions/workflows/ci.yml/badge.svg)](https://github.com/Inokinoki/EFIBoot-KCM/actions/workflows/ci.yml)
+
 A KDE Configuration Module (KCM) for managing EFI boot entries.
 
 ![EFI Boot Manager Preview](.github/preview.png)
