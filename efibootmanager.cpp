@@ -203,7 +203,7 @@ void EfiBootManager::runAuthAction(const QString &actionId, const QVariantMap &a
         if (job->error() != 0) {
             const QString errorMsg = job->errorText();
             const QString finalError = errorMsg.isEmpty()
-                ? i18n("Authentication or execution failed. Check terminal for details.")
+                ? i18n("Authentication or execution failed. Check system logs for details.")
                 : errorMsg;
             setLastError(finalError);
             Q_EMIT operationResult(false, finalError);
