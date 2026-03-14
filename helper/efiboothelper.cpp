@@ -111,12 +111,13 @@ public Q_SLOTS:
         }
 
         const QByteArray encoded = encodeUint16Array(newOrder);
-        int ret = qefi_set_variable(global, u"BootOrder"_s, encoded);
-        if (ret != 0) {
-            reply = KAuth::ActionReply::HelperErrorReply();
-            reply.setErrorDescription(u"Failed to write BootOrder. Error code: %1. Ensure efivarfs is mounted read-write and not locked down."_s.arg(ret));
-            return reply;
-        }
+        // TODO: When qefi_set_variable returns int error code:
+        qefi_set_variable(global, u"BootOrder"_s, encoded);
+        // if (ret != 0) {
+        //     reply = KAuth::ActionReply::HelperErrorReply();
+        //     reply.setErrorDescription(u"Failed to write BootOrder. Error code: %1. Ensure efivarfs is mounted read-write and not locked down."_s.arg(ret));
+        //     return reply;
+        // }
 
         // Verify the write succeeded by reading back
         const auto verifyOrder = parseUint16Array(qefi_get_variable(global, u"BootOrder"_s));
@@ -149,12 +150,13 @@ public Q_SLOTS:
         }
 
         const QUuid global = efiGlobalGuid();
-        int ret = qefi_set_variable_uint16(global, u"BootNext"_s, entryId);
-        if (ret != 0) {
-            reply = KAuth::ActionReply::HelperErrorReply();
-            reply.setErrorDescription(u"Failed to write BootNext. Error code: %1. Ensure efivarfs is mounted read-write and not locked down."_s.arg(ret));
-            return reply;
-        }
+        // TODO: When qefi_set_variable_uint16 returns int error code:
+        qefi_set_variable_uint16(global, u"BootNext"_s, entryId);        // if (ret != 0) {
+        //     reply = KAuth::ActionReply::HelperErrorReply();
+        //     reply.setErrorDescription(u"Failed to write BootNext. Error code: %1. Ensure efivarfs is mounted read-write and not locked down."_s.arg(ret));
+        //     return reply;
+        // }
+        
 
         // Verify the write succeeded by reading back
         const quint16 verifyBootNext = qefi_get_variable_uint16(global, u"BootNext"_s);
