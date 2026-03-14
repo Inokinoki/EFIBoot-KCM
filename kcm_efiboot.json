@@ -10,7 +10,8 @@
         "Name": "EFI Boot",
         "ServiceTypes": [
             "KCModule"
-        ]
+        ],
+        "Version": "0.0.1"
     },
     "X-KDE-System-Settings-Parent-Category": "system-administration",
     "X-KDE-Weight": 60

@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-project(efibootkcm LANGUAGES CXX)
+project(efibootkcm VERSION 0.0.1 LANGUAGES CXX)
 
 set(QT_MIN_VERSION "6.9.0")
 set(KF6_MIN_VERSION "6.18.0")
