@@ -117,6 +117,12 @@ KCMUtils.GridViewKCM {
             infoMessageDialog.text = text
             infoMessageDialog.open()
         }
+        function onOperationResult(success, message) {
+            // Show operation result dialog
+            resultDialog.resultDialogSuccess = success
+            resultDialog.resultMessage = message
+            resultDialog.open()
+        }
     }
 
     view.delegate: KCMUtils.GridDelegate {
@@ -252,6 +258,37 @@ KCMUtils.GridViewKCM {
                 onTriggered: kcm.manager.rebootTo(delegate.entryId)
             }
         ]
+    }
+
+    QQC.Dialog {
+        id: resultDialog
+        title: resultDialog.resultDialogSuccess ? i18nc("@title", "Success") : i18nc("@title", "Error")
+        modal: true
+        property bool resultDialogSuccess: true
+        property string resultMessage: ""
+
+        standardButtons: QQC.Dialog.Ok
+
+        contentItem: ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+
+            RowLayout {
+                spacing: Kirigami.Units.largeSpacing
+
+                Kirigami.Icon {
+                    source: resultDialog.resultDialogSuccess ? "dialog-ok" : "dialog-error"
+                    color: resultDialog.resultDialogSuccess ? Kirigami.Theme.positiveTextColor : Kirigami.Theme.negativeTextColor
+                    Layout.preferredWidth: Kirigami.Units.iconSizes.large
+                    Layout.preferredHeight: Kirigami.Units.iconSizes.large
+                }
+
+                QQC.Label {
+                    text: resultDialog.resultMessage
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+            }
+        }
     }
 
     QQC.Dialog {

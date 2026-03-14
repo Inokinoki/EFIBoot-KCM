@@ -22,7 +22,7 @@ target_include_directories(efiboothelper PRIVATE
     ${CMAKE_SOURCE_DIR}/third_party/qefivar
 )
 
-install(TARGETS efiboothelper DESTINATION ${KDE_INSTALL_LIBEXECDIR}/kauth)
+install(TARGETS efiboothelper DESTINATION libexec/kf6/kauth)
 
 # KAuth action definitions + polkit policy
 if (NOT DEFINED KDE_INSTALL_KAUTH_ACTIONS_DIR)
@@ -30,5 +30,10 @@ if (NOT DEFINED KDE_INSTALL_KAUTH_ACTIONS_DIR)
 endif()
 
 install(FILES ${CMAKE_SOURCE_DIR}/org.kde.kcm.efiboot.actions DESTINATION ${KDE_INSTALL_KAUTH_ACTIONS_DIR})
-install(FILES ${CMAKE_SOURCE_DIR}/org.kde.kcm.efiboot.policy DESTINATION ${KDE_INSTALL_DATADIR}/polkit-1/actions)
+install(FILES ${CMAKE_SOURCE_DIR}/org.kde.kcm.efiboot.policy DESTINATION ${KDE_INSTALL_DATADIR}/polkit-1/actions/)
+install(FILES ${CMAKE_SOURCE_DIR}/helper/org.kde.kcm.efiboot.helper.conf DESTINATION /etc/dbus-1/system.d/)
+
+# Configure and install D-Bus service file
+configure_file(org.kde.kcm.efiboot.helper.service.in org.kde.kcm.efiboot.helper.service @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.kde.kcm.efiboot.helper.service DESTINATION ${KDE_INSTALL_DATADIR}/dbus-1/system-services/)
 

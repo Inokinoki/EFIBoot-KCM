@@ -50,6 +50,16 @@ class EfiBootHelper : public QObject
     Q_OBJECT
 
 public Q_SLOTS:
+    KAuth::ActionReply org_kde_kcm_efiboot_setdefault(const QVariantMap &args)
+    {
+        return setDefault(args);
+    }
+
+    KAuth::ActionReply org_kde_kcm_efiboot_rebootto(const QVariantMap &args)
+    {
+        return rebootTo(args);
+    }
+
     KAuth::ActionReply setDefault(const QVariantMap &args)
     {
         KAuth::ActionReply reply;
@@ -70,6 +80,26 @@ public Q_SLOTS:
         const QUuid global = efiGlobalGuid();
         auto order = parseUint16Array(qefi_get_variable(global, u"BootOrder"_s));
 
+        if (order.empty()) {
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"BootOrder is empty. No boot entries found."_s);
+            return reply;
+        }
+
+        // Check if entry exists in current order
+        bool found = false;
+        for (const auto id : order) {
+            if (id == entryId) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"Entry %1 not found in BootOrder."_s.arg(QString::number(entryId, 16).toUpper().rightJustified(4, u'0')));
+            return reply;
+        }
+
         // New order: selected entry first, then the existing order without duplicates.
         std::vector<quint16> newOrder;
         newOrder.reserve(order.size() + 1);
@@ -80,10 +110,24 @@ public Q_SLOTS:
             }
         }
 
-        qefi_set_variable(global, u"BootOrder"_s, encodeUint16Array(newOrder));
+        const QByteArray encoded = encodeUint16Array(newOrder);
+        int ret = qefi_set_variable(global, u"BootOrder"_s, encoded);
+        if (ret != 0) {
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"Failed to write BootOrder. Error code: %1. Ensure efivarfs is mounted read-write and not locked down."_s.arg(ret));
+            return reply;
+        }
+
+        // Verify the write succeeded by reading back
+        const auto verifyOrder = parseUint16Array(qefi_get_variable(global, u"BootOrder"_s));
+        if (verifyOrder.empty() || verifyOrder.front() != entryId) {
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"Failed to update BootOrder. The value may not have been written correctly."_s);
+            return reply;
+        }
 
         reply = KAuth::ActionReply::SuccessReply();
-        reply.addData(u"info"_s, u"Default boot entry updated."_s);
+        reply.addData(u"info"_s, u"Default boot entry updated to %1."_s.arg(QString::number(entryId, 16).toUpper().rightJustified(4, u'0')));
         return reply;
     }
 
@@ -105,10 +149,23 @@ public Q_SLOTS:
         }
 
         const QUuid global = efiGlobalGuid();
-        qefi_set_variable_uint16(global, u"BootNext"_s, entryId);
+        int ret = qefi_set_variable_uint16(global, u"BootNext"_s, entryId);
+        if (ret != 0) {
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"Failed to write BootNext. Error code: %1. Ensure efivarfs is mounted read-write and not locked down."_s.arg(ret));
+            return reply;
+        }
+
+        // Verify the write succeeded by reading back
+        const quint16 verifyBootNext = qefi_get_variable_uint16(global, u"BootNext"_s);
+        if (verifyBootNext != entryId) {
+            reply = KAuth::ActionReply::HelperErrorReply();
+            reply.setErrorDescription(u"Failed to set BootNext. The value may not have been written correctly."_s);
+            return reply;
+        }
 
         reply = KAuth::ActionReply::SuccessReply();
-        reply.addData(u"info"_s, u"BootNext set. Reboot your system to boot into the selected entry."_s);
+        reply.addData(u"info"_s, u"BootNext set to %1. Reboot your system to boot into the selected entry."_s.arg(QString::number(entryId, 16).toUpper().rightJustified(4, u'0')));
         return reply;
     }
 };
