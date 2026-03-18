@@ -16,3 +16,77 @@ Name=Reboot to EFI boot entry
 Description=Set BootNext and reboot the system into the selected entry
 Policy=auth_admin_keep
 
+[cc.inoki.efibootkcm.settimeout]
+Name=Set EFI boot timeout
+Description=Change the boot manager timeout in seconds
+Policy=auth_admin_keep
+
+[cc.inoki.efibootkcm.resetbootnext]
+Name=Reset BootNext
+Description=Clear the one-time boot entry (BootNext)
+Policy=auth_admin_keep
+
+[cc.inoki.efibootkcm.reboottobios]
+Name=Reboot to BIOS/firmware setup
+Description=Request firmware setup on next reboot
+Policy=auth_admin_keep
+
+[cc.inoki.efibootkcm.diagnostics]
+Name=Get EFI diagnostics
+Description=Retrieve system EFI diagnostics and health information
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.moveentryup]
+Name=Move boot entry up
+Description=Move a boot entry up in the boot order
+Policy=auth_admin_keep
+
+[cc.inoki.efibootkcm.moveentrydown]
+Name=Move boot entry down
+Description=Move a boot entry down in the boot order
+Policy=auth_admin_keep
+
+[cc.inoki.efibootkcm.deleteentry]
+Name=Delete EFI boot entry
+Description=Delete an EFI boot entry (use with caution)
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.backupentries]
+Name=Backup EFI boot entries
+Description=Export all EFI boot entries to a file
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.restoreentries]
+Name=Restore EFI boot entries
+Description=Import EFI boot entries from a backup file
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.renameentry]
+Name=Rename EFI boot entry
+Description=Change the name of an EFI boot entry
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.togglevisibility]
+Name=Toggle boot entry visibility
+Description=Show or hide a boot entry in the boot menu
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.cloneentry]
+Name=Clone EFI boot entry
+Description=Duplicate an EFI boot entry
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.editentry]
+Name=Edit EFI boot entry
+Description=Edit EFI boot entry path and optional data
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.getbootstats]
+Name=Get boot statistics
+Description=Retrieve system boot time and performance statistics
+Policy=auth_admin
+
+[cc.inoki.efibootkcm.getboothistory]
+Name=Get boot history
+Description=Retrieve and update boot history database
+Policy=auth_admin

@@ -8,15 +8,18 @@
 #include "efibootentrymodel.h"
 #include "efibootmanager.h"
 
+#include <KConfigGroup>
 #include <KPluginFactory>
 
 #include <QQmlEngine>
+#include <QStandardPaths>
 
 K_PLUGIN_CLASS_WITH_JSON(EfiBootKCM, "kcm_efiboot.json")
 
 EfiBootKCM::EfiBootKCM(QObject *parent, const KPluginMetaData &data, const QVariantList &args)
     : KQuickConfigModule(parent, data)
     , m_manager(new EfiBootManager(this))
+    , m_config(KSharedConfig::openConfig(QStringLiteral("efibootkcmrc")))
 {
     Q_UNUSED(args)
 
@@ -35,9 +38,28 @@ EfiBootManager *EfiBootKCM::manager() const
     return m_manager;
 }
 
+QString EfiBootKCM::settingsPath() const
+{
+    return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + QStringLiteral("/efibootkcmrc");
+}
+
 void EfiBootKCM::load()
 {
     m_manager->refresh();
+    loadPreferences();
+}
+
+void EfiBootKCM::savePreferences()
+{
+    KConfigGroup group(m_config, QStringLiteral("General"));
+    // Settings can be saved here when needed
+    group.sync();
+}
+
+void EfiBootKCM::loadPreferences()
+{
+    KConfigGroup group(m_config, QStringLiteral("General"));
+    // Settings can be loaded here when needed
 }
 
 #include "kcm.moc"

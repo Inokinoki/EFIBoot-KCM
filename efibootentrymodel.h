@@ -23,8 +23,37 @@ public:
         IsBootNextRole,
         IsCurrentRole,
         IconNameRole,
+        OsTypeRole,
+        AccentColorRole,
+        DeviceIconRole,
     };
     Q_ENUM(Roles)
+
+    enum OsType {
+        Unknown,
+        Windows,
+        Linux,
+        LinuxFedora,
+        LinuxUbuntu,
+        LinuxArch,
+        LinuxDebian,
+        LinuxOpenSUSE,
+        LinuxMint,
+        LinuxManjaro,
+        LinuxGentoo,
+        LinuxPopOS,
+        LinuxKali,
+        LinuxCentOS,
+        LinuxRedHat,
+        Bsd,
+        MacOS,
+        Android,
+        EfiShell,
+        Recovery,
+        Diagnostic,
+        Other,
+    };
+    Q_ENUM(OsType)
 
     struct Entry {
         quint16 id = 0;
@@ -36,6 +65,10 @@ public:
         bool isCurrent = false; // true if this is the current booted entry
         QByteArray raw;
         QByteArray optionalData;
+        OsType osType = Unknown;
+        QString accentColor;
+        QString iconName;
+        QString deviceIcon;
     };
 
     explicit EfiBootEntryModel(QObject *parent = nullptr);
