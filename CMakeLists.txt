@@ -54,6 +54,7 @@ target_sources(kcm_efiboot PRIVATE
     efibootentrymodel.h
     efibootmanager.cpp
     efibootmanager.h
+    efivarcommon.h
     ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefi.h
     ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefi.cpp
     ${CMAKE_SOURCE_DIR}/third_party/qefivar/qefidpacpi.cpp
