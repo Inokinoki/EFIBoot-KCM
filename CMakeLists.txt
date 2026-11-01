@@ -23,6 +23,7 @@ include(KDEClangFormat)
 include(KDEGitCommitHooks)
 include(FeatureSummary)
 include(ECMDeprecationSettings)
+include(CTest)
 
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
@@ -77,6 +78,10 @@ target_include_directories(kcm_efiboot PRIVATE
 )
 
 add_subdirectory(helper)
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
