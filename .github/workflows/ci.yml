@@ -77,6 +77,7 @@ jobs:
         # Install required dependencies
         pacman --noconfirm -S --needed \
           base-devel \
+          appstream \
           cmake \
           extra-cmake-modules \
           qt6-base \
