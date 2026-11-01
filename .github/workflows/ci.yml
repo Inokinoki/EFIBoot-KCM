@@ -53,6 +53,11 @@ jobs:
         cd build
         make -j$(nproc)
 
+    - name: Test
+      run: |
+        cd build
+        ctest --output-on-failure
+
     - name: Install
       run: |
         cd build
@@ -102,6 +107,11 @@ jobs:
       run: |
         cd build
         make -j$(nproc)
+
+    - name: Test
+      run: |
+        cd build
+        ctest --output-on-failure
 
     - name: Install
       run: |

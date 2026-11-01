@@ -8,6 +8,8 @@
 #include <QAbstractListModel>
 #include <QByteArray>
 
+#include <vector>
+
 class EfiBootEntryModel : public QAbstractListModel
 {
     Q_OBJECT
