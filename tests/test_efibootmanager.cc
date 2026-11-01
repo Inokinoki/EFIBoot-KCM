@@ -66,6 +66,7 @@ private Q_SLOTS:
     void testMarksFirstBootOrderEntryAsDefault();
     void testMarksBootNext();
     void testMarksBootCurrent();
+    void testMissingBootNextFlagsNoEntry();
     void testSelectsIconByNameAndPath();
     void testDetailsForEntry();
 };
@@ -174,6 +175,25 @@ void TestEfiBootManager::testMarksBootCurrent()
     QVERIFY(one && two);
     QCOMPARE(one->isCurrent, false);
     QCOMPARE(two->isCurrent, true);
+}
+
+void TestEfiBootManager::testMissingBootNextFlagsNoEntry()
+{
+    // Boot0000 is a valid entry ID. An absent BootNext must not be mistaken
+    // for "BootNext is 0000", otherwise Boot0000 can never be picked for a
+    // one time boot.
+    qefi_set_variable(globalGuid, QStringLiteral("BootOrder"), uint16Array({0x0000}));
+    qefi_set_variable(globalGuid, QStringLiteral("Boot0000"), bootOptionOne());
+
+    EfiBootManager manager;
+    manager.refresh();
+
+    QCOMPARE(manager.entries()->rowCount(), 1);
+
+    const auto *zero = manager.entries()->entryForId(0x0000);
+    QVERIFY(zero);
+    QCOMPARE(zero->isBootNext, false);
+    QCOMPARE(zero->isCurrent, false);
 }
 
 void TestEfiBootManager::testSelectsIconByNameAndPath()

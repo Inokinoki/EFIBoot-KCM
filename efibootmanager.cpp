@@ -12,6 +12,7 @@
 #include <QtEndian>
 
 #include <algorithm>
+#include <optional>
 
 #include <qefi.h>
 
@@ -40,6 +41,20 @@ static std::vector<quint16> parseUint16Array(const QByteArray &data)
 static QString bootVarName(quint16 entryId)
 {
     return QStringLiteral("Boot%1").arg(entryId, 4, 16, QLatin1Char('0'));
+}
+
+// Reads a uint16 EFI variable. qefi_get_variable_uint16() returns 0 both for a
+// variable that is absent and for one that holds 0, so the raw variable is
+// read here to keep those two cases apart.
+static std::optional<quint16> readOptionalUint16(const QUuid &guid, const QString &name)
+{
+    const QByteArray raw = qefi_get_variable(guid, name);
+    if (raw.size() < 2) {
+        return std::nullopt;
+    }
+
+    const quint16 raw16 = *reinterpret_cast<const quint16 *>(raw.constData());
+    return qFromLittleEndian<quint16>(raw16);
 }
 
 EfiBootManager::EfiBootManager(QObject *parent)
@@ -88,11 +103,13 @@ void EfiBootManager::refresh()
     const auto bootOrder = parseUint16Array(qefi_get_variable(global, u"BootOrder"_s));
     const quint16 defaultId = bootOrder.empty() ? 0 : bootOrder.front();
 
-    // Read BootNext to get one-time boot entry
-    const auto bootNext = qefi_get_variable_uint16(global, u"BootNext"_s);
+    // Read BootNext to get one-time boot entry. The variable is absent when no
+    // one time boot is pending, which must not be confused with an entry id
+    // of 0.
+    const std::optional<quint16> bootNext = readOptionalUint16(global, u"BootNext"_s);
 
     // Read BootCurrent to get the currently booted entry
-    const auto bootCurrent = qefi_get_variable_uint16(global, u"BootCurrent"_s);
+    const std::optional<quint16> bootCurrent = readOptionalUint16(global, u"BootCurrent"_s);
 
     std::vector<EfiBootEntryModel::Entry> entries;
     entries.reserve(bootOrder.size());
@@ -116,8 +133,8 @@ void EfiBootManager::refresh()
         entry.path = opt.path();
         entry.isVisible = opt.isVisible();
         entry.isDefault = (entryId == defaultId);
-        entry.isBootNext = (bootNext == entryId);
-        entry.isCurrent = (bootCurrent == entryId);
+        entry.isBootNext = bootNext.has_value() && *bootNext == entryId;
+        entry.isCurrent = bootCurrent.has_value() && *bootCurrent == entryId;
         entry.raw = raw;
         entry.optionalData = qefi_extract_optional_data(raw);
         entries.push_back(std::move(entry));
